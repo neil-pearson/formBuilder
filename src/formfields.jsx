@@ -11,29 +11,31 @@ export class DynamicForm extends React.Component {
         this.state = { value: '' };
 
         this.formJSON = this.props.formJSON.formJSON;
+
     }
 
 
-    getFormField = ( fieldName, fieldJSON ) => {
-    const props = {
-        name: fieldName,
-        label: fieldJSON.label,
-        options: fieldJSON.options
-    };
+    getFormField = (fieldName, fieldJSON, fieldValue) => {
+        const props = {
+            name: fieldName,
+            label: fieldJSON.label,
+            options: fieldJSON.options,
+            fieldValue: fieldValue
+        };
 
-    if (fieldJSON.type === "text") {
-        return <TextField {...props} />
+        if (fieldJSON.type === "text") {
+            return <TextField {...props} />
+        }
+
+        if (fieldJSON.type === "select") {
+            return <SelectField  {...props} />
+        }
+
     }
 
-    if (fieldJSON.type === "select") {
-        return <SelectField  {...props} />
-    }
-
-}
-
-        render() {
+    render() {
         return (
-            <form className="needs-validation" noValidate="">
+            <form className="needs-validation" onSubmit={this.props.omSubmit}>
                 {Object.keys(this.props.formJSON.formJSON).map((key, ind) => (
                     <div key={key}>
                         {this.getFormField(key, this.props.formJSON.formJSON[key])}
@@ -48,7 +50,28 @@ export class DynamicForm extends React.Component {
 }
 
 export class TextField extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.handleChange = this.handleChange.bind(this);
+
+        this.state = { fieldValue: '' };
+
+        this.setState({ fieldValue: props.fieldValue });
+    }
+
+
+    handleChange(e) {
+        this.props.handleChange(e, this.props.name);
+        this.setState({ fieldValue: e.target.value });
+    }
+
     render() {
+        const {
+            fieldValue
+        } = this.state;
+
         return (
             <>
                 <div className="form-group col-sm-6">
@@ -58,7 +81,10 @@ export class TextField extends React.Component {
                         type="text"
                         name={this.props.name}
                         id={this.props.name}
+                        value={this.state.fieldValue}
                         placeholder={this.props.placeholder || ""}
+                        onChange={this.handleChange}
+                        refs={this.props.name}
                     />
                 </div>
             </>
